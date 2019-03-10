@@ -204,6 +204,11 @@ def parse_args(argv=()):
         action="store_true",
         help="draw arrows to (instead of from) imported modules",
     )
+    args.add(
+        "--root_dir",
+        type=str,
+        help="name of the root directory for one-level subdirectory bucketing",
+    )
 
     _args = args.parse_args(argv)
 
@@ -233,6 +238,7 @@ def parse_args(argv=()):
             verbose=0,
             include_missing=True,
             reverse=False,
+            root_dir=None,
         )
 
     _args.show = True
