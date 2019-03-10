@@ -167,8 +167,8 @@ class DepGraph(object):
             #     name = name[:-3]
             log.debug("depgraph import keys:%r", imports.keys())
 
-            root_dir = self.args.get("root_dir")
-            if root_dir:
+            root_dir = self.args["root_dir"]
+            if root_dir != "___":
                 if not self._is_valid_import(name, root_dir):
                     continue
                 name = self._bucket_name(name, root_dir)
@@ -418,7 +418,7 @@ class DepGraph(object):
         self.skiplist.append(re.compile(fnmatch.translate(name)))
 
     def _is_valid_import(self, import_name, root_dir):
-        if not root_dir:
+        if not root_dir or self._is_special_import_name(import_name):
             return True
 
         root_dir_import_fragment = root_dir + "."
@@ -428,10 +428,17 @@ class DepGraph(object):
 
         return True
 
+    def _is_special_import_name(self, import_name):
+        return import_name == "__main__" or import_name == self.args["dummyname"]
+
     def _bucket_name(self, name, root_dir):
+        if self._is_special_import_name(name):
+            return name
+
         name_parts = name.split(".")
         root_dir_index = name_parts.index(root_dir)
-        return ".".join(name_parts[: root_dir_index + 1])
+        bucketed_name = ".".join(name_parts[: root_dir_index + 2])
+        return bucketed_name
 
     def _bucketed_imports(self, imports, root_dir):
         new_imports = {}

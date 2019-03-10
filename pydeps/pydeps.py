@@ -23,6 +23,7 @@ def _pydeps(trgt, **kw):
     fmt = kw["format"]
     show_svg = kw.get("show")
     reverse = kw.get("reverse")
+    root_dir = kw.get("root_dir")
     if os.getcwd() != trgt.workdir:
         # the tests are calling _pydeps directoy
         os.chdir(trgt.workdir)
@@ -89,6 +90,7 @@ def externals(trgt, **kwargs):
         show_raw_deps=False,
         verbose=0,
         include_missing=True,
+        root_dir=None,
     )
     kw.update(kwargs)
     depgraph = py2depgraph.py2dep(trgt, **kw)
