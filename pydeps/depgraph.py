@@ -148,6 +148,110 @@ class DepGraph(object):
         south
         """.split()
 
+    def __init__(self, depgraf, types, **args):
+        self.curhue = 150  # start with a green-ish color
+        self.colors = {}
+        self.cycles = []
+        self.cyclenodes = set()
+        self.cyclerelations = set()
+
+        self.args = args
+
+        self.sources = {}  # module_name -> Source
+        self.skiplist = [re.compile(fnmatch.translate(arg)) for arg in args["exclude"]]
+        # depgraf = {name: imports for (name, imports) in depgraf.items()}
+
+        for name, imports in list(depgraf.items()):
+            log.debug("depgraph name=%r imports=%r", name, imports)
+            # if name.endswith('.py'):
+            #     name = name[:-3]
+            log.debug("depgraph import keys:%r", imports.keys())
+
+            root_dir = self.args.get("root_dir")
+            if root_dir:
+                if not self._is_valid_import(name, root_dir):
+                    continue
+                name = self._bucket_name(name, root_dir)
+                imports = self._bucketed_imports(imports, root_dir)
+
+            src = Source(
+                name=name,
+                imports=list(
+                    imports.keys()
+                ),  # XXX: throwing away .values(), which is abspath!
+                args=args,
+                exclude=self._exclude(name),
+            )
+
+            self.add_source(src)
+            for iname, path in list(imports.items()):
+                # if iname.endswith('.py'):
+                #     iname = iname[:-3]
+                src = Source(
+                    name=iname, path=path, args=args, exclude=self._exclude(iname)
+                )
+                self.add_source(src)
+
+        self.module_count = len(self.sources)
+        cli.verbose(1, "there are", self.module_count, "total modules")
+
+        self.connect_generations()
+        if self.args["show_cycles"]:
+            self.find_import_cycles()
+        self.calculate_bacon()
+        if self.args["show_raw_deps"]:
+            print(self)
+
+        self.exclude_noise()
+        self.exclude_bacon(self.args["max_bacon"])
+
+        excluded = [v for v in list(self.sources.values()) if v.excluded]
+        # print "EXCLUDED:", excluded
+        self.skip_count = len(excluded)
+        cli.verbose(1, "skipping", self.skip_count, "modules")
+        for module in excluded:
+            # print 'exclude:', module.name
+            cli.verbose(2, "  ", module.name)
+
+        self.remove_excluded()
+
+        if not self.args["show_deps"]:
+            cli.verbose(3, self)
+
+    def __getitem__(self, item):
+        return self.sources[item]
+
+    def __iter__(self):
+        visited = set(self.skip_modules) | set(self.args["exclude"])
+
+        def visit(src):
+            if src.name in visited:
+                return
+            visited.add(src.name)
+            for name in src.imports:
+                impmod = self.sources[name]
+
+                # FIXME: why do we want to exclude **/*/__init__.py? This line
+                # causes `collections` package in py3 to be excluded.
+                # if impmod.path and not impmod.path.endswith('__init__.py'):
+                if not src.name.startswith(impmod.name + "."):
+                    yield impmod, src
+                visit(impmod)
+
+        # for _src in list(self.sources.values()):
+        for _src in self.sources.values():
+            for source in visit(_src):
+                cli.verbose(4, "Yielding", source[0], source[1])
+                yield source
+
+    def __repr__(self):
+        return json.dumps(
+            self.sources,
+            indent=4,
+            sort_keys=True,
+            default=lambda obj: obj.__json__() if hasattr(obj, "__json__") else obj,
+        )
+
     def levelcounts(self):
         pass
 
@@ -215,69 +319,9 @@ class DepGraph(object):
         #     print [s.pattern for s in self.skiplist]
         return any(skip.match(name) for skip in self.skiplist)
 
-    def __init__(self, depgraf, types, **args):
-        self.curhue = 150  # start with a green-ish color
-        self.colors = {}
-        self.cycles = []
-        self.cyclenodes = set()
-        self.cyclerelations = set()
-
-        self.args = args
-
-        self.sources = {}  # module_name -> Source
-        self.skiplist = [re.compile(fnmatch.translate(arg)) for arg in args["exclude"]]
-        # depgraf = {name: imports for (name, imports) in depgraf.items()}
-
-        for name, imports in list(depgraf.items()):
-            log.debug("depgraph name=%r imports=%r", name, imports)
-            # if name.endswith('.py'):
-            #     name = name[:-3]
-            src = Source(
-                name=name,
-                imports=list(
-                    imports.keys()
-                ),  # XXX: throwing away .values(), which is abspath!
-                args=args,
-                exclude=self._exclude(name),
-            )
-            self.add_source(src)
-            for iname, path in list(imports.items()):
-                # if iname.endswith('.py'):
-                #     iname = iname[:-3]
-                src = Source(
-                    name=iname, path=path, args=args, exclude=self._exclude(iname)
-                )
-                self.add_source(src)
-
-        self.module_count = len(self.sources)
-        cli.verbose(1, "there are", self.module_count, "total modules")
-
-        self.connect_generations()
-        if self.args["show_cycles"]:
-            self.find_import_cycles()
-        self.calculate_bacon()
-        if self.args["show_raw_deps"]:
-            print(self)
-
-        self.exclude_noise()
-        self.exclude_bacon(self.args["max_bacon"])
-
-        excluded = [v for v in list(self.sources.values()) if v.excluded]
-        # print "EXCLUDED:", excluded
-        self.skip_count = len(excluded)
-        cli.verbose(1, "skipping", self.skip_count, "modules")
-        for module in excluded:
-            # print 'exclude:', module.name
-            cli.verbose(2, "  ", module.name)
-
-        self.remove_excluded()
-
-        if not self.args["show_deps"]:
-            cli.verbose(3, self)
-
-    # def verbose(self, n, *args):
-    #     if self.args['verbose'] >= n:
-    #         print(*args)
+    def verbose(self, n, *args):
+        if self.args["verbose"] >= n:
+            print(*args)
 
     def add_source(self, src):
         if src.name in self.sources:
@@ -286,40 +330,6 @@ class DepGraph(object):
         else:
             log.debug("ADD-SOURCE[=]\n%r", src)
             self.sources[src.name] = src
-
-    def __getitem__(self, item):
-        return self.sources[item]
-
-    def __iter__(self):
-        visited = set(self.skip_modules) | set(self.args["exclude"])
-
-        def visit(src):
-            if src.name in visited:
-                return
-            visited.add(src.name)
-            for name in src.imports:
-                impmod = self.sources[name]
-
-                # FIXME: why do we want to exclude **/*/__init__.py? This line
-                # causes `collections` package in py3 to be excluded.
-                # if impmod.path and not impmod.path.endswith('__init__.py'):
-                if not src.name.startswith(impmod.name + "."):
-                    yield impmod, src
-                visit(impmod)
-
-        # for _src in list(self.sources.values()):
-        for _src in self.sources.values():
-            for source in visit(_src):
-                cli.verbose(4, "Yielding", source[0], source[1])
-                yield source
-
-    def __repr__(self):
-        return json.dumps(
-            self.sources,
-            indent=4,
-            sort_keys=True,
-            default=lambda obj: obj.__json__() if hasattr(obj, "__json__") else obj,
-        )
 
     def find_import_cycles(self):
         def traverse(node, path):
@@ -396,8 +406,6 @@ class DepGraph(object):
     def remove_excluded(self):
         """Remove all sources marked as excluded.
         """
-        # import yaml
-        # print yaml.dump({k:v.__json__() for k,v in self.sources.items()}, default_flow_style=False)
         sources = list(self.sources.values())
         for src in sources:
             if src.excluded:
@@ -408,3 +416,28 @@ class DepGraph(object):
     def _add_skip(self, name):
         # print 'add skip:', name
         self.skiplist.append(re.compile(fnmatch.translate(name)))
+
+    def _is_valid_import(self, import_name, root_dir):
+        if not root_dir:
+            return True
+
+        root_dir_import_fragment = root_dir + "."
+        if root_dir_import_fragment not in import_name:
+            log.debug("Invalid import name:%r", import_name)
+            return False
+
+        return True
+
+    def _bucket_name(self, name, root_dir):
+        name_parts = name.split(".")
+        root_dir_index = name_parts.index(root_dir)
+        return ".".join(name_parts[: root_dir_index + 1])
+
+    def _bucketed_imports(self, imports, root_dir):
+        new_imports = {}
+        for import_name, v in imports.items():
+            if not self._is_valid_import(import_name, root_dir):
+                continue
+            new_import_bucket_name = self._bucket_name(import_name, root_dir)
+            new_imports[new_import_bucket_name] = v
+        return new_imports
