@@ -18,10 +18,8 @@ def test_dep2dot():
             - b.py
     """
     with create_files(files) as workdir:
-        assert simpledeps('foo', '-LDEBUG -vv') == {
-            'foo.b -> foo.a'
-        }
+        assert simpledeps("foo", "-LDEBUG -vv") == {"foo.b -> foo.a"}
 
         args = pydeps.cli.parse_args(["foo", "--noshow"])
         pydeps.pydeps(**args)
-        assert os.path.exists(os.path.join(workdir, 'foo.svg'))
+        assert os.path.exists(os.path.join(workdir, "foo.svg"))

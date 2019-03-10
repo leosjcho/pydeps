@@ -10,5 +10,4 @@ def test_py2depgraph(capsys):
         - b.py
     """
     with create_files(files) as workdir:
-        assert simpledeps('a.py') == {'b -> a'}
-
+        assert simpledeps("a.py") == {"b -> a"}

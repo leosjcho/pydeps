@@ -5,8 +5,8 @@ from pydeps.target import Target
 
 
 def empty(args="", **kw):
-    args = pydeps.cli.parse_args(['foo', '--no-config'] + args.split())
-    args.pop('fname')
+    args = pydeps.cli.parse_args(["foo", "--no-config"] + args.split())
+    args.pop("fname")
     args.update(kw)
     return args
 

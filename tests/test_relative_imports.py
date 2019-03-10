@@ -15,7 +15,7 @@ def test_relative_imports():
             - b.py
     """
     with create_files(files) as workdir:
-        assert simpledeps('relimp') == {'relimp.b -> relimp.a'}
+        assert simpledeps("relimp") == {"relimp.b -> relimp.a"}
 
 
 def test_relative_imports2():
@@ -29,9 +29,9 @@ def test_relative_imports2():
             - c.py
     """
     with create_files(files) as workdir:
-        deps = simpledeps('relimp')
-        assert 'relimp.c -> relimp.b' in deps
-        assert 'relimp.b -> relimp.a' in deps
+        deps = simpledeps("relimp")
+        assert "relimp.c -> relimp.b" in deps
+        assert "relimp.b -> relimp.a" in deps
 
 
 def test_relative_imports3():
@@ -43,7 +43,7 @@ def test_relative_imports3():
             - b.py
     """
     with create_files(files) as workdir:
-        assert simpledeps('relimp') == {'relimp.b -> relimp.a'}
+        assert simpledeps("relimp") == {"relimp.b -> relimp.a"}
 
 
 def test_relative_imports_same_name_with_std():
@@ -54,11 +54,11 @@ def test_relative_imports_same_name_with_std():
                 import io
     """
     with create_files(files) as workdir:
-        if sys.version_info < (3,):                # pragma: nocover
-            deps = {'relimp.io -> relimp.io'}
-        else:                                      # pragma: nocover
-            deps = {'io -> relimp.io'}
-        assert simpledeps('relimp', '--pylib') == deps
+        if sys.version_info < (3,):  # pragma: nocover
+            deps = {"relimp.io -> relimp.io"}
+        else:  # pragma: nocover
+            deps = {"io -> relimp.io"}
+        assert simpledeps("relimp", "--pylib") == deps
 
 
 def test_relative_imports_same_name_with_std_future():
@@ -70,11 +70,8 @@ def test_relative_imports_same_name_with_std_future():
                 import io
     """
     with create_files(files) as workdir:
-        deps = {
-            '__future__ -> relimp.io',
-            'io -> relimp.io'
-        }
-        assert simpledeps('relimp', '--pylib') == deps
+        deps = {"__future__ -> relimp.io", "io -> relimp.io"}
+        assert simpledeps("relimp", "--pylib") == deps
 
 
 def test_pydeps_colors():
@@ -90,9 +87,7 @@ def test_pydeps_colors():
                 from . import colors
     """
     with create_files(files, cleanup=False) as workdir:
-        assert simpledeps('pdeps', '-x enum') == {
-            'pdeps.colors -> pdeps.depgraph',
-        }
+        assert simpledeps("pdeps", "-x enum") == {"pdeps.colors -> pdeps.depgraph"}
 
 
 def test_hierarchy():
@@ -110,6 +105,6 @@ def test_hierarchy():
     """
     with create_files(files, cleanup=True) as workdir:
         os.system("tree " + workdir)
-        deps = simpledeps('relimp')
-        assert 'relimp.b -> relimp.a.amodule' in deps
-        assert 'relimp.b.bmodule -> relimp.a.amodule' in deps
+        deps = simpledeps("relimp")
+        assert "relimp.b -> relimp.a.amodule" in deps
+        assert "relimp.b.bmodule -> relimp.a.amodule" in deps

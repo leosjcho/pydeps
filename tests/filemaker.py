@@ -40,7 +40,7 @@ class FilemakerBase(object):  # pragma: nocover
         print("touch", fname)
 
     def _make_empty_file(self, fname):
-        if fname != 'empty':
+        if fname != "empty":
             self.make_empty_file(fname)
 
     def make_list(self, lst):
@@ -76,10 +76,10 @@ class Filemaker(FilemakerBase):
         os.chdir(cwd)
 
     def make_file(self, filename, content):
-        open(filename, 'w').write(content)
+        open(filename, "w").write(content)
 
     def make_empty_file(self, fname):
-        open(fname, 'w').close()
+        open(fname, "w").close()
 
 
 @contextmanager

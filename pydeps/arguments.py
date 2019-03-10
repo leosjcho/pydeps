@@ -9,12 +9,15 @@ try:
 
     def is_string(v):
         return isinstance(v, (str, unicode))
+
+
 except NameError:
+
     def is_string(v):
         return isinstance(v, str)
 
 
-DEFAULT_NONE = '____'
+DEFAULT_NONE = "____"
 
 
 def boolval(v):
@@ -24,9 +27,9 @@ def boolval(v):
         return bool(v)
     if is_string(v):
         v = v.lower()
-        if v in {'j', 'y', 'ja', 'yes', '1', 'true'}:
+        if v in {"j", "y", "ja", "yes", "1", "true"}:
             return True
-        if v in {'n', 'nei', 'no', '0', 'false'}:
+        if v in {"n", "nei", "no", "0", "false"}:
             return False
     raise ValueError("Don't know how to convert %r to bool" % v)
 
@@ -43,11 +46,8 @@ def identity(v):
     return v
 
 
-typefns = {
-    'BOOL': boolval,
-    'INT': int,
-    'LIST': listval
-}
+typefns = {"BOOL": boolval, "INT": int, "LIST": listval}
+
 
 class Argument(object):
     def __init__(self, *flags, **args):
@@ -59,38 +59,38 @@ class Argument(object):
         return self.__dict__
 
     def typename(self):
-        if 'kind' in self._args:
-            return self._args['kind']
-        if self._args.get('action') in {'store_true', 'store_false'}:
-            return 'BOOL'
-        tp = self._args.get('type')
+        if "kind" in self._args:
+            return self._args["kind"]
+        if self._args.get("action") in {"store_true", "store_false"}:
+            return "BOOL"
+        tp = self._args.get("type")
         if tp is not None:
             return tp.__name__.upper()
-        v = self._args.get('default')
+        v = self._args.get("default")
         if v is None:
             return DEFAULT_NONE
         return v.__class__.__name__.upper()
 
     def argname(self):
-        if 'dest' in self._args:
-            return self._args['dest']
-        return self._flags[-1].lstrip('-').replace('-', '_')
+        if "dest" in self._args:
+            return self._args["dest"]
+        return self._flags[-1].lstrip("-").replace("-", "_")
 
     def default(self):
-        if 'default' in self._args:
-            return self._args['default']
-        if self._args.get('action') == 'store_true':
+        if "default" in self._args:
+            return self._args["default"]
+        if self._args.get("action") == "store_true":
             return False
-        if self._args.get('action') == 'store_false':            
+        if self._args.get("action") == "store_false":
             return True
-        return '___'
+        return "___"
 
     def add_to_parser(self, parser):
         args = self._args
-        args.pop('default', None)  # remove default value
-        args.pop('kind', None)     # remove our attributes
-        if args.get('action') in {'store_true', 'store_false'}:
-            args['default'] = None
+        args.pop("default", None)  # remove default value
+        args.pop("kind", None)  # remove our attributes
+        if args.get("action") in {"store_true", "store_false"}:
+            args["default"] = None
         parser.add_argument(*self._flags, **args)
 
 
@@ -125,7 +125,7 @@ class Arguments(object):
         # print("CONFIG_FILES:", config_files)
 
         self.debug = debug
-        self.arglist = [] 
+        self.arglist = []
         self.args = {}
         self.config_files = config_files
         self.argtypes = {}
@@ -139,10 +139,15 @@ class Arguments(object):
             try:
                 config = conf.items("pydeps")
             except (configparser.NoOptionError, configparser.NoSectionError):
-                warnings.warn(' '.join("""
+                warnings.warn(
+                    " ".join(
+                        """
                     Couldn't find a [pydeps] section in your config files
                     %r -- or it was empty
-                """.split()) % (self.config_files,))
+                """.split()
+                    )
+                    % (self.config_files,)
+                )
         p = argparse.ArgumentParser(*self.posargs, **self.kwargs)
         for arg in self.arglist:
             arg.add_to_parser(p)
@@ -150,7 +155,10 @@ class Arguments(object):
 
         for key, val in config:
             if key not in self.args:
-                warnings.warn("Your .pydeps file contained %s = %s which doesn't match any argument" % (key, val))
+                warnings.warn(
+                    "Your .pydeps file contained %s = %s which doesn't match any argument"
+                    % (key, val)
+                )
                 continue
             argval = args[key]
             confval = val
@@ -166,7 +174,7 @@ class Arguments(object):
                     default = None
                 args[key] = default
 
-        del args['config']
+        del args["config"]
         return args.ns
 
     def add(self, *flags, **kwargs):
@@ -178,7 +186,6 @@ class Arguments(object):
         self.defaults[argname] = arg.default()
 
     def __repr__(self):
-        return json.dumps(dict(
-            types=self.argtypes,
-            defaults=self.defaults,
-        ), indent=4, sort_keys=True)
+        return json.dumps(
+            dict(types=self.argtypes, defaults=self.defaults), indent=4, sort_keys=True
+        )

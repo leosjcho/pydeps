@@ -11,7 +11,7 @@ def test_file():
             import collections
     """
     with create_files(files) as workdir:
-        assert simpledeps('a.py') == set()
+        assert simpledeps("a.py") == set()
 
 
 def test_file_pylib():
@@ -20,7 +20,7 @@ def test_file_pylib():
             import collections
     """
     with create_files(files) as workdir:
-        assert 'collections -> a' in simpledeps('a.py', '--pylib')
+        assert "collections -> a" in simpledeps("a.py", "--pylib")
 
 
 def test_file_pyliball():
@@ -29,4 +29,4 @@ def test_file_pyliball():
             import collections
     """
     with create_files(files) as workdir:
-        assert 'collections -> a' in simpledeps('a.py', '--pylib --pylib-all')
+        assert "collections -> a" in simpledeps("a.py", "--pylib --pylib-all")

@@ -16,7 +16,7 @@ def test_from_html5lib():
                 barpy = 42
     """
     with create_files(files) as workdir:
-        assert simpledeps('foo', '--show-deps -LINFO -vv') == {
-            'bar -> foo.a',
-            'bar.py -> foo.a'
+        assert simpledeps("foo", "--show-deps -LINFO -vv") == {
+            "bar -> foo.a",
+            "bar.py -> foo.a",
         }

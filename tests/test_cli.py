@@ -20,7 +20,7 @@ def test_output(tmpdir):
     with create_files(files) as workdir:
         assert os.getcwd() == workdir
 
-        outname = os.path.join('unrelated', 'foo.svg')
+        outname = os.path.join("unrelated", "foo.svg")
         assert not os.path.exists(outname)
-        pydeps(fname='foo', **empty('--noshow', output=outname))
+        pydeps(fname="foo", **empty("--noshow", output=outname))
         assert os.path.exists(outname)

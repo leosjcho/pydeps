@@ -13,6 +13,4 @@ def test_from_html5lib():
             - __init__.py
     """
     with create_files(files) as workdir:
-        assert simpledeps('foo', '--show-deps -LINFO -vv') == {
-            'bar -> foo.a',
-        }
+        assert simpledeps("foo", "--show-deps -LINFO -vv") == {"bar -> foo.a"}

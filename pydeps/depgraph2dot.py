@@ -41,7 +41,8 @@ class PyDepGraphDot(object):
                     continue
                 drawn.add((bname, aname))
                 ctx.write_rule(
-                    aname, bname,
+                    aname,
+                    bname,
                     weight=depgraph.proximity_metric(a, b),
                     minlen=depgraph.dissimilarity_metric(a, b),
                     # style='dotted',
@@ -56,9 +57,11 @@ class PyDepGraphDot(object):
                 drawn.add((bname, aname))
 
                 ctx.write_rule(
-                    aname, bname,
+                    aname,
+                    bname,
                     weight=depgraph.proximity_metric(a, b),
-                    minlen=depgraph.dissimilarity_metric(a, b))
+                    minlen=depgraph.dissimilarity_metric(a, b),
+                )
 
                 visited.add(a)
                 visited.add(b)
@@ -69,14 +72,20 @@ class PyDepGraphDot(object):
             for src in visited:
                 bg, fg = depgraph.get_colors(src, space)
                 if src.name in depgraph.cyclenodes:
-                    ctx.write_node(src.name, label=src.label,
-                                   fillcolor=colors.rgb2css(bg),
-                                   fontcolor=colors.rgb2css(fg),
-                                   shape='octagon')
+                    ctx.write_node(
+                        src.name,
+                        label=src.label,
+                        fillcolor=colors.rgb2css(bg),
+                        fontcolor=colors.rgb2css(fg),
+                        shape="octagon",
+                    )
                 else:
-                    ctx.write_node(src.name, label=src.label,
-                                   fillcolor=colors.rgb2css(bg),
-                                   fontcolor=colors.rgb2css(fg))
+                    ctx.write_node(
+                        src.name,
+                        label=src.label,
+                        fillcolor=colors.rgb2css(bg),
+                        fontcolor=colors.rgb2css(fg),
+                    )
 
         return ctx.text()
 
@@ -98,7 +107,8 @@ class CycleGraphDot(object):
                     continue
                 drawn.add((bname, aname))
                 ctx.write_rule(
-                    bname, aname,
+                    bname,
+                    aname,
                     weight=depgraph.proximity_metric(a, b),
                     minlen=depgraph.dissimilarity_metric(a, b),
                     # style='dotted',
@@ -110,14 +120,20 @@ class CycleGraphDot(object):
             for src in visited:
                 bg, fg = depgraph.get_colors(src, space)
                 if src.name in depgraph.cyclenodes:
-                    ctx.write_node(src.name, label=src.label,
-                                   fillcolor=colors.rgb2css(bg),
-                                   fontcolor=colors.rgb2css(fg),
-                                   shape='octagon')
+                    ctx.write_node(
+                        src.name,
+                        label=src.label,
+                        fillcolor=colors.rgb2css(bg),
+                        fontcolor=colors.rgb2css(fg),
+                        shape="octagon",
+                    )
                 else:
-                    ctx.write_node(src.name, label=src.label,
-                                   fillcolor=colors.rgb2css(bg),
-                                   fontcolor=colors.rgb2css(fg))
+                    ctx.write_node(
+                        src.name,
+                        label=src.label,
+                        fillcolor=colors.rgb2css(bg),
+                        fontcolor=colors.rgb2css(fg),
+                    )
 
         return ctx.text()
 

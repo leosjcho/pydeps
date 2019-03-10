@@ -18,7 +18,7 @@ def test_dep2dot():
         g = depgrf("foo")
         d = json.loads(repr(g))
         print(d)
-        assert '__main__' in d['foo']['imported_by']
-        assert g.sources['foo.a'] == g.sources['foo.a']
-        assert str(g.sources['foo.a']).startswith('foo.a')
-        assert 'foo.b' in repr(g.sources['foo.a'])
+        assert "__main__" in d["foo"]["imported_by"]
+        assert g.sources["foo.a"] == g.sources["foo.a"]
+        assert str(g.sources["foo.a"]).startswith("foo.a")
+        assert "foo.b" in repr(g.sources["foo.a"])

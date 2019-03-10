@@ -28,7 +28,7 @@ class ColorSpace(object):
         self.nodes = {}
         for node in nodes:
             # print 'xx', node.name, node.bacon
-            parts = node.name.split('.')
+            parts = node.name.split(".")
             self.add_to_tree(parts, self.nodes)
         self.basecolors = distinct_hues(len(self.nodes))
         self.colors = dict(zip(self.nodes.keys(), self.basecolors))
@@ -43,7 +43,7 @@ class ColorSpace(object):
 
     def color(self, src):
         nodename = src.name
-        parts = nodename.split('.')
+        parts = nodename.split(".")
         hue = self.colors[parts[0]]
         saturation = min(0.95, 0.4 + 0.1 * (src.out_degree - 1))
         lightness = max(0.3, 0.5 - 0.02 * (src.in_degree - 1))
@@ -58,6 +58,7 @@ class ColorSpace(object):
 
     def __str__(self):  # pragma: nocover
         import pprint
+
         return pprint.pformat(self.colors)
 
 
@@ -92,20 +93,18 @@ def colordiff(rgb1, rgb2):
     """
     (r, g, b) = rgb1
     (r2, g2, b2) = rgb2
-    return (
-        max(r, r2) - min(r, r2) +
-        max(g, g2) - min(g, g2) +
-        max(b, b2) - min(b, b2)
-    )
+    return max(r, r2) - min(r, r2) + max(g, g2) - min(g, g2) + max(b, b2) - min(b, b2)
 
 
 def foreground(background, *options):
     """Find the best foreground color from `options` based on `background`
        color.
     """
+
     def absdiff(a, b):
         return brightnessdiff(a, b)
         # return 3 * brightnessdiff(a, b) + colordiff(a, b)
+
     diffs = [(absdiff(background, color), color) for color in options]
     diffs.sort(reverse=True)
     return diffs[0][1]
@@ -114,4 +113,4 @@ def foreground(background, *options):
 def rgb2css(rgb):
     """Convert rgb to hex.
     """
-    return '#%02x%02x%02x' % rgb
+    return "#%02x%02x%02x" % rgb

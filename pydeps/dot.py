@@ -10,7 +10,7 @@ import shlex
 
 from . import cli
 
-win32 = sys.platform == 'win32'
+win32 = sys.platform == "win32"
 
 
 def is_unicode(s):  # pragma: nocover
@@ -47,17 +47,14 @@ def pipe(cmd, txt):
     """Pipe `txt` into the command `cmd` and return the output.
     """
     return Popen(
-        cmd2args(cmd),
-        stdout=subprocess.PIPE,
-        stdin=subprocess.PIPE,
-        shell=win32
+        cmd2args(cmd), stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=win32
     ).communicate(txt)[0]
 
 
 def dot(src, **kw):
     """Execute the dot command to create an svg output.
     """
-    cmd = "dot -T%s" % kw.pop('T', 'svg')
+    cmd = "dot -T%s" % kw.pop("T", "svg")
     for k, v in list(kw.items()):
         if v is True:
             cmd += " -%s" % k
@@ -75,13 +72,15 @@ def call_graphviz_dot(src, fmt):
         svg = dot(src, T=fmt)
     except OSError as e:  # pragma: nocover
         if e.errno == 2:
-            cli.error("""
+            cli.error(
+                """
                cannot find 'dot'
 
                pydeps calls dot (from graphviz) to create svg diagrams,
                please make sure that the dot executable is available
                on your path.
-            """)
+            """
+            )
         raise
     return svg
 
@@ -89,13 +88,13 @@ def call_graphviz_dot(src, fmt):
 def display_svg(kw, fname):  # pragma: nocover
     """Try to display the svg file on this platform.
     """
-    if kw['display'] is None:
+    if kw["display"] is None:
         cli.verbose("Displaying:", fname)
-        if sys.platform == 'win32':
+        if sys.platform == "win32":
             os.startfile(fname)
         else:
             opener = "open" if sys.platform == "darwin" else "xdg-open"
             subprocess.call([opener, fname])
     else:
-        cli.verbose(kw['display'] + " " + fname)
-        os.system(kw['display'] + " " + fname)
+        cli.verbose(kw["display"] + " " + fname)
+        os.system(kw["display"] + " " + fname)

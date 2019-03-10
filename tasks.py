@@ -19,19 +19,5 @@ def outdated(ctx):
     ctx.run("pip list --outdated")
 
 
-ns = Collection(
-    'pydeps',
-    freeze,
-    outdated,
-    version,
-    upversion,
-    publish,
-    docs,
-    package
-)
-ns.configure({
-    'pkg': Package(),
-    'run': {
-        'echo': True
-    }
-})
+ns = Collection("pydeps", freeze, outdated, version, upversion, publish, docs, package)
+ns.configure({"pkg": Package(), "run": {"echo": True}})

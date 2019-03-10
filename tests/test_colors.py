@@ -1,7 +1,14 @@
 # -*- coding: utf-8 -*-
 import os
 
-from pydeps.colors import rgb2css, brightness, brightnessdiff, colordiff, name2rgb, foreground
+from pydeps.colors import (
+    rgb2css,
+    brightness,
+    brightnessdiff,
+    colordiff,
+    name2rgb,
+    foreground,
+)
 
 red = (255, 0, 0)
 green = (0, 255, 0)
@@ -12,12 +19,12 @@ white = (255, 255, 255)
 
 
 def test_rgb2css():
-    assert rgb2css(red) == '#ff0000'
-    assert rgb2css(green) == '#00ff00'
-    assert rgb2css(yellow) == '#00ffff'
-    assert rgb2css(blue) == '#0000ff'
-    assert rgb2css(black) == '#000000'
-    assert rgb2css(white) == '#ffffff'
+    assert rgb2css(red) == "#ff0000"
+    assert rgb2css(green) == "#00ff00"
+    assert rgb2css(yellow) == "#00ffff"
+    assert rgb2css(blue) == "#0000ff"
+    assert rgb2css(black) == "#000000"
+    assert rgb2css(white) == "#ffffff"
 
 
 def test_brightness():
@@ -38,8 +45,6 @@ def test_foreground():
 
 def test_name2rgb():
     def fg(name):
-        return foreground(
-            name2rgb(13),
-            black, white)
+        return foreground(name2rgb(13), black, white)
 
-    assert fg('hello') == fg('hello.world')
+    assert fg("hello") == fg("hello.world")

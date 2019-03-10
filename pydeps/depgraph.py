@@ -12,13 +12,14 @@ import enum
 from . import colors, cli
 import sys
 import logging
+
 log = logging.getLogger(__name__)
 
 # we're normally not interested in imports of std python packages.
 PYLIB_PATH = {
     # in virtualenvs that see the system libs, these will be different.
     os.path.split(os.path.split(pprint.__file__)[0])[0].lower(),
-    os.path.split(os.__file__)[0].lower()
+    os.path.split(os.__file__)[0].lower(),
 }
 
 
@@ -39,27 +40,27 @@ class Source(object):
     def __init__(self, name, path=None, imports=(), exclude=False, args=None):
         self.args = args or {}
         if name == "__main__" and path:
-            self.name = path.replace('\\', '/').replace('/', '.')
-            if self.args.get('verbose', 0) >= 2:  # pragma: nocover
+            self.name = path.replace("\\", "/").replace("/", ".")
+            if self.args.get("verbose", 0) >= 2:  # pragma: nocover
                 print("changing __main__ =>", self.name)
         else:
             self.name = name
 
         # self.kind = kind
-        self.path = path             # needed here..?
+        self.path = path  # needed here..?
         self.imports = set(imports)  # modules we import
-        self.imported_by = set()     # modules that import us
-        self.bacon = sys.maxsize      # bacon distance
+        self.imported_by = set()  # modules that import us
+        self.bacon = sys.maxsize  # bacon distance
         self.excluded = exclude
 
     @property
     def name_parts(self):
-        return self.name.split('.')
+        return self.name.split(".")
 
     @property
     def path_parts(self):
         p = self.path or ""
-        return p.replace('\\', '/').lower().split('/')
+        return p.replace("\\", "/").lower().split("/")
 
     @property
     def in_degree(self):
@@ -81,7 +82,7 @@ class Source(object):
         """Is this module just noise?  (too common either at top or bottom of
            the graph).
         """
-        noise = self.args['noise_level']
+        noise = self.args["noise_level"]
         if not (self.in_degree and self.out_degree):
             return self.degree > noise
         return False
@@ -94,11 +95,11 @@ class Source(object):
             bacon=self.bacon,
         )
         if self.excluded:
-            res['excluded'] = 'EXCLUDED'
+            res["excluded"] = "EXCLUDED"
         if self.imports:
-            res['imports'] = list(sorted(self.imports))
+            res["imports"] = list(sorted(self.imports))
         if self.imported_by:
-            res['imported_by'] = list(sorted(self.imported_by))
+            res["imported_by"] = list(sorted(self.imported_by))
         return res
 
     def __str__(self):
@@ -114,7 +115,11 @@ class Source(object):
         return json.dumps(self.__json__(), indent=4)
 
     def __iadd__(self, other):
-        if self.name == other.name and self.imports == other.imports and self.bacon == other.bacon:
+        if (
+            self.name == other.name
+            and self.imports == other.imports
+            and self.bacon == other.bacon
+        ):
             return self
         log.debug("iadd lhs: %r", self)
         log.debug("iadd rhs: %r", other)
@@ -132,8 +137,8 @@ class Source(object):
         """Convert a module name to a formatted node label. This is a default
            policy - please override.
         """
-        if len(self.name) > 14 and '.' in self.name:
-            return '\\.\\n'.join(self.name.split('.'))  # pragma: nocover
+        if len(self.name) > 14 and "." in self.name:
+            return "\\.\\n".join(self.name.split("."))  # pragma: nocover
         return self.name
 
 
@@ -164,7 +169,7 @@ class DepGraph(object):
             return colorspace.color(src)
 
     def _is_pylib(self, path):
-        log.info('path %r in PYLIB_PATH %r => %s', path, PYLIB_PATH, path in PYLIB_PATH)
+        log.info("path %r in PYLIB_PATH %r => %s", path, PYLIB_PATH, path in PYLIB_PATH)
         return path in PYLIB_PATH
 
     def proximity_metric(self, a, b):
@@ -219,8 +224,8 @@ class DepGraph(object):
 
         self.args = args
 
-        self.sources = {}             # module_name -> Source
-        self.skiplist = [re.compile(fnmatch.translate(arg)) for arg in args['exclude']]
+        self.sources = {}  # module_name -> Source
+        self.skiplist = [re.compile(fnmatch.translate(arg)) for arg in args["exclude"]]
         # depgraf = {name: imports for (name, imports) in depgraf.items()}
 
         for name, imports in list(depgraf.items()):
@@ -229,7 +234,9 @@ class DepGraph(object):
             #     name = name[:-3]
             src = Source(
                 name=name,
-                imports=list(imports.keys()),  # XXX: throwing away .values(), which is abspath!
+                imports=list(
+                    imports.keys()
+                ),  # XXX: throwing away .values(), which is abspath!
                 args=args,
                 exclude=self._exclude(name),
             )
@@ -238,10 +245,7 @@ class DepGraph(object):
                 # if iname.endswith('.py'):
                 #     iname = iname[:-3]
                 src = Source(
-                    name=iname,
-                    path=path,
-                    args=args,
-                    exclude=self._exclude(iname)
+                    name=iname, path=path, args=args, exclude=self._exclude(iname)
                 )
                 self.add_source(src)
 
@@ -249,14 +253,14 @@ class DepGraph(object):
         cli.verbose(1, "there are", self.module_count, "total modules")
 
         self.connect_generations()
-        if self.args['show_cycles']:
+        if self.args["show_cycles"]:
             self.find_import_cycles()
         self.calculate_bacon()
-        if self.args['show_raw_deps']:
+        if self.args["show_raw_deps"]:
             print(self)
 
         self.exclude_noise()
-        self.exclude_bacon(self.args['max_bacon'])
+        self.exclude_bacon(self.args["max_bacon"])
 
         excluded = [v for v in list(self.sources.values()) if v.excluded]
         # print "EXCLUDED:", excluded
@@ -268,7 +272,7 @@ class DepGraph(object):
 
         self.remove_excluded()
 
-        if not self.args['show_deps']:
+        if not self.args["show_deps"]:
             cli.verbose(3, self)
 
     # def verbose(self, n, *args):
@@ -287,7 +291,7 @@ class DepGraph(object):
         return self.sources[item]
 
     def __iter__(self):
-        visited = set(self.skip_modules) | set(self.args['exclude'])
+        visited = set(self.skip_modules) | set(self.args["exclude"])
 
         def visit(src):
             if src.name in visited:
@@ -310,8 +314,12 @@ class DepGraph(object):
                 yield source
 
     def __repr__(self):
-        return json.dumps(self.sources, indent=4, sort_keys=True,
-                          default=lambda obj: obj.__json__() if hasattr(obj, '__json__') else obj)
+        return json.dumps(
+            self.sources,
+            indent=4,
+            sort_keys=True,
+            default=lambda obj: obj.__json__() if hasattr(obj, "__json__") else obj,
+        )
 
     def find_import_cycles(self):
         def traverse(node, path):
@@ -320,14 +328,12 @@ class DepGraph(object):
 
             if node.name in path:
                 # found cycle
-                cycle = path[path.index(node.name):] + [node.name]
+                cycle = path[path.index(node.name) :] + [node.name]
                 self.cycles.append(cycle)
                 for nodename in cycle:
                     self.cyclenodes.add(nodename)
                 for i in range(len(cycle) - 1):
-                    self.cyclerelations.add(
-                        (cycle[i], cycle[i + 1])
-                    )
+                    self.cyclerelations.add((cycle[i], cycle[i + 1]))
                 return
 
             for impmod in node.imports:
@@ -361,12 +367,12 @@ class DepGraph(object):
                 bacon(self.sources[imp], n + 1)
 
         # print("SOURCES:", self.sources)
-        if '__main__' in self.sources:
+        if "__main__" in self.sources:
             # print("FOUND MAIN", self.sources['__main__'])
-            bacon(self.sources['__main__'], 0)
-        elif self.args['dummyname'] in self.sources:
+            bacon(self.sources["__main__"], 0)
+        elif self.args["dummyname"] in self.sources:
             # print('\n'*10, "USING DUMMY", repr(self.sources))
-            bacon(self.sources[self.args['dummyname']], 0)
+            bacon(self.sources[self.args["dummyname"]], 0)
 
     def exclude_noise(self):
         for src in list(self.sources.values()):

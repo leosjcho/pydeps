@@ -11,11 +11,11 @@ import setuptools
 from distutils.core import setup
 from setuptools.command.test import test as TestCommand
 
-version='1.7.1'
+version = "1.7.1"
 
 
 class PyTest(TestCommand):
-    user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
+    user_options = [("pytest-args=", "a", "Arguments to pass to py.test")]
 
     def initialize_options(self):
         TestCommand.initialize_options(self)
@@ -29,39 +29,33 @@ class PyTest(TestCommand):
     def run_tests(self):
         # import here, cause outside the eggs aren't loaded
         import pytest
+
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
 
 
 setup(
-    name='pydeps',
+    name="pydeps",
     version=version,
-    packages=['pydeps'],
-    install_requires=[
-        'enum34; python_version < "3.4"',
-        'stdlib_list',
-    ],
-    long_description=io.open('README.rst', encoding='utf8').read(),
-    entry_points={
-        'console_scripts': [
-            'pydeps = pydeps.pydeps:pydeps',
-        ]
-    },
-    url='https://github.com/thebjorn/pydeps',
-    cmdclass={'test': PyTest},
-    license='BSD',
-    author='bjorn',
-    author_email='bp@datakortet.no',
-    description='Display module dependencies',
+    packages=["pydeps"],
+    install_requires=['enum34; python_version < "3.4"', "stdlib_list"],
+    long_description=io.open("README.rst", encoding="utf8").read(),
+    entry_points={"console_scripts": ["pydeps = pydeps.pydeps:pydeps"]},
+    url="https://github.com/thebjorn/pydeps",
+    cmdclass={"test": PyTest},
+    license="BSD",
+    author="bjorn",
+    author_email="bp@datakortet.no",
+    description="Display module dependencies",
     classifiers=[
-        'Intended Audience :: Developers',
-        'Natural Language :: English',
-        'License :: OSI Approved :: BSD License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Topic :: Software Development :: Libraries :: Python Modules',
-    ]
+        "Intended Audience :: Developers",
+        "Natural Language :: English",
+        "License :: OSI Approved :: BSD License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+    ],
 )
